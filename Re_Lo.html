@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration and Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        .message {
+            color: green;
+            font-weight: bold;
+            display: none;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+            display: none;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 4px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .eye-icon {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+        }
+        .form-group {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="registration-container">
+        <h2>Register</h2>
+        <div class="message" id="registration-success">Registration Successful!</div>
+        <div class="error" id="registration-error"></div>
+        <form id="registration-form">
+            <input type="text" id="first-name" placeholder="First Name" required>
+            <input type="text" id="last-name" placeholder="Last Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <div class="form-group">
+                <input type="password" id="new-password" placeholder="New Password" required>
+                <span class="eye-icon" onclick="togglePassword('new-password')">👁️</span>
+            </div>
+            <div class="form-group">
+                <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                <span class="eye-icon" onclick="togglePassword('confirm-password')">👁️</span>
+            </div>
+            <button type="button" onclick="register()">Register</button>
+            <div>
+                <p>Already registered? <a href="#" onclick="showLogin()">Login here</a></p>
+            </div>
+        </form>
+    </div>
+
+    <div class="container" id="login-container" style="display: none;">
+        <h2>Login</h2>
+        <div class="message" id="login-success">Login Successful!</div>
+        <div class="error" id="login-error"></div>
+        <form id="login-form">
+            <input type="email" id="login-email" placeholder="Email" required>
+            <div class="form-group">
+                <input type="password" id="login-password" placeholder="Password" required>
+                <span class="eye-icon" onclick="togglePassword('login-password')">👁️</span>
+            </div>
+            <button type="button" onclick="login()">Login</button>
+            <div>
+                <p>New here? <a href="#" onclick="showRegistration()">Register here</a></p>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const registeredUsers = {}; // For demo purposes, use local storage or a database in real-world applications
+
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function showRegistration() {
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('registration-container').style.display = 'block';
+            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('login-success').style.display = 'none';
+            document.getElementById('registration-success').style.display = 'none';
+        }
+
+        function showLogin() {
+            document.getElementById('registration-container').style.display = 'none';
+            document.getElementById('login-container').style.display = 'block';
+            document.getElementById('registration-error').style.display = 'none';
+            document.getElementById('registration-success').style.display = 'none';
+            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('login-success').style.display = 'none';
+        }
+
+        function register() {
+            const firstName = document.getElementById('first-name').value.trim();
+            const lastName = document.getElementById('last-name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            document.getElementById('registration-error').style.display = 'none';
+            document.getElementById('registration-success').style.display = 'none';
+
+            if (!validateEmail(email)) {
+                document.getElementById('registration-error').innerText = 'Invalid email format.';
+                document.getElementById('registration-error').style.display = 'block';
+                return;
+            }
+
+            if (!validatePassword(newPassword)) {
+                document.getElementById('registration-error').innerText = 'Password must contain at least 8 characters, including uppercase, lowercase, digits, and special symbols.';
+                document.getElementById('registration-error').style.display = 'block';
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                document.getElementById('registration-error').innerText = 'Passwords do not match.';
+                document.getElementById('registration-error').style.display = 'block';
+                return;
+            }
+
+            if (registeredUsers[email]) {
+                showLogin();
+                document.getElementById('registration-error').innerText = 'Already registered.';
+                document.getElementById('registration-error').style.display = 'block';
+                return;
+            }
+
+            if (firstName === lastName) {
+                document.getElementById('registration-error').innerText = 'First name and last name cannot be the same.';
+                document.getElementById('registration-error').style.display = 'block';
+                return;
+            }
+
+            registeredUsers[email] = newPassword;
+            document.getElementById('registration-success').style.display = 'block';
+            setTimeout(showLogin, 2000); // Redirect to login after 2 seconds
+        }
+
+        function login() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('login-success').style.display = 'none';
+
+            if (!registeredUsers[email] || registeredUsers[email] !== password) {
+                document.getElementById('login-error').innerText = 'Invalid email or password.';
+                document.getElementById('login-error').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('login-success').style.display = 'block';
+            setTimeout(() => {
+                window.location.href = 'https://www.flipkart.com'; // Redirect to Flipkart
+            }, 2000); // Redirect after 2 seconds
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function validatePassword(password) {
+            const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            return re.test(password);
+        }
+    </script>
+</body>
+</html>
